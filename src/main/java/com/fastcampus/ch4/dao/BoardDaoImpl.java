@@ -1,0 +1,24 @@
+package com.fastcampus.ch4.dao;
+
+import com.fastcampus.ch4.domain.BoardDto;
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class BoardDaoImpl implements BoardDao {
+    @Autowired
+    SqlSession session;
+
+    String namespace = "com.fastcampus.ch4.dao.BoardMapper.";
+
+    @Override
+    public BoardDto select(int bno) throws Exception{
+        System.out.println("호출");
+        System.out.println("bno ==>" + bno);
+        BoardDto boardDto = session.selectOne(namespace+"select", bno);
+        System.out.println("boardDto ===>" + boardDto);
+        return session.selectOne(namespace+"select", bno);
+
+    }
+}
