@@ -21,8 +21,38 @@ import java.util.Map;
 @Controller
 @RequestMapping("/board")
 public class BoardController {
+
     @Autowired
     BoardService boardService;
+
+    @PostMapping("/write")
+    public String write(BoardDto boardDto, Model m, HttpSession session, RedirectAttributes rattr){
+        //getAttribute가 반환하는 값이 Object여서 형변환 필요
+        String writer = (String) session.getAttribute("id");
+        boardDto.setWriter(writer);
+
+        try {
+            int rowCnt = boardService.write(boardDto); //insert
+
+            if(rowCnt!=1){
+                throw new Exception("write failed");
+            }
+            rattr.addFlashAttribute("msg", "WRT_OK");
+
+            return "redirect:/board/list"; //redirect는 무조건 get 형식이다. 여기서 list는 get형식
+        } catch (Exception e) {
+            e.printStackTrace();
+            m.addAttribute("boardDto", boardDto);
+            rattr.addFlashAttribute("msg", "WRT_OK");
+            return "board";
+        }
+    }
+    @GetMapping("/write")
+    public String write(Model m){
+        m.addAttribute("mode", "new");
+
+        return "board"; //읽기와 쓰기로 사용, 쓰기에 사용할때는 mode값을 new로 지정
+    }
 
     @PostMapping("/remove")
     public String remove(Integer bno, Integer page, Integer pageSize, Model m, HttpSession session, RedirectAttributes rattr){

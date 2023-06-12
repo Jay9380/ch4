@@ -20,12 +20,18 @@
         <li><a href=""><i class="fas fa-search small"></i></a></li>
     </ul>
 </div>
+<script>
+    let msg ="${msg}";
+    if(msg=="WRT_ERR"){
+        alert("게시글 등록에 실패했습니다. 다시 시도해주세요")
+    }
+</script>
 <div style="text-align:center">
-    <h2>게시글 읽기</h2>
+    <h2>게시글 ${mode=="new" ? "글쓰기" : "읽기"}</h2>
     <form action="" id="form">
-        <input type="text" name="bno" value="${boardDto.bno}" readonly="readonly">
-        <input type="text" name="title" value="${boardDto.title}" readonly="readonly">
-        <textarea name="content" id="" cols="30" rows="10" readonly="readonly">${boardDto.content}</textarea>
+        <input type="hidden" name="bno" value="${boardDto.bno}">
+        <input type="text" name="title" value="${boardDto.title}" ${mode=="new" ? '' : 'readonly="readonly"'}>
+        <textarea name="content" id="" cols="30" rows="10" ${mode=="new" ? '' : 'readonly="readonly"'}>${boardDto.content}</textarea>
         <button type="button" id="writeBtn" class="btn">등록</button>
         <button type="button" id="modifyBtn" class="btn">수정</button>
         <button type="button" id="removeBtn" class="btn">삭제</button>
@@ -37,6 +43,16 @@
        $('#listBtn').on("click", function (){
            console.log("listBtn 클릭")
            location.href = "<c:url value='/board/list'/>?page=${page}&pageSize=${pageSize}";
+        });
+
+        $('#writeBtn').on("click", function (){
+            console.log('writeBtn 실행')
+            let form = $('#form');
+            form.attr("action", "<c:url value='/board/write'/>");
+            form.attr("method", "post");
+            form.submit();
+            //    form의 action을 remove로 하고 method는 post형식으로 전송하는 것
+
         });
 
         $('#removeBtn').on("click", function (){
