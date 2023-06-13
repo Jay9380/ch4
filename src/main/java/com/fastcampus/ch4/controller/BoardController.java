@@ -2,17 +2,20 @@ package com.fastcampus.ch4.controller;
 
 import com.fastcampus.ch4.domain.BoardDto;
 import com.fastcampus.ch4.domain.PageHandler;
+import com.fastcampus.ch4.domain.SearchCondition;
 import com.fastcampus.ch4.service.BoardService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,30 +98,26 @@ public class BoardController {
     }
 
     @GetMapping("/list")
-    public String list(Integer page, Integer pageSize, Model m, HttpServletRequest request) {
+    public String list(SearchCondition sc, Model m, HttpServletRequest request) {
         if(!loginCheck(request))
             return "redirect:/login/login?toURL="+request.getRequestURL();  // 로그인을 안했으면 로그인 화면으로 이동
 
-        if(page==null){
-            page =1;
-        }
-        if(pageSize==null){
-            pageSize = 10;
-        }
-
         try {
-            int totalCnt = boardService.getCount();
-            PageHandler pageHandler = new PageHandler(totalCnt, page, pageSize);
+            int totalCnt = boardService.getSearchResultCnt(sc);
+            m.addAttribute("totalCnt", totalCnt);
+            System.out.println("totalCnt ===>" + totalCnt);
 
-            Map map = new HashMap();
-            map.put("offset", (page - 1) * pageSize);
-            map.put("pageSize", pageSize);
+            PageHandler pageHandler = new PageHandler(totalCnt, sc);
 
-            List<BoardDto> list = boardService.getPage(map);
+            System.out.println("pageHandler ===>" + pageHandler);
+            List<BoardDto> list = boardService.getSearchResultPage(sc);
             m.addAttribute("list", list);
             m.addAttribute("ph", pageHandler);
-            m.addAttribute("page", page);
-            m.addAttribute("pageSize", pageSize);
+
+            System.out.println("List ===>" + list);
+
+            Instant startOfToday = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
+            m.addAttribute("startOfToday", startOfToday.toEpochMilli());
 
         } catch (Exception e) {
             throw new RuntimeException(e);
